@@ -51,4 +51,17 @@ func main() {
 	for index, option := range Lessons {
 		fmt.Println(index, option)
 	}
+
+	Languages := [9]string{"C", "Lisp", "C++", "Java", "Python",
+		"JavaScript", "Ruby", "Go", "Rust",
+	}
+
+	classics := Languages[0:3]  // Slice an array
+	modern := make([]string, 4) // length of 'modern' will be 4
+	modern = Languages[3:7]     // includes 3 excludes 7
+	new := Languages[7:]        // Starts from 7 till the end of the array
+
+	fmt.Printf("classic languagues: %v\n", classics) // classic languagues: [C Lisp C++]
+	fmt.Printf("modern languages: %v\n", modern)     // modern languages: [Java Python JavaScript Ruby]
+	fmt.Printf("new languages: %v\n", new)           // new languages: [Go Rust]
 }
