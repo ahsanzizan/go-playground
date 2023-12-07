@@ -27,7 +27,7 @@ func generateId(n int) string {
 }
 
 func getUsers(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("Responding to GET /users\n")
+	fmt.Printf("Responding to GET /\n")
 
 	usersList := make([]User, 0, len(users))
 
