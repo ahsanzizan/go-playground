@@ -25,6 +25,14 @@ type BlogResponse struct {
 	Blogs   []Blog `json:"blogs"`
 }
 
+func print(message string) {
+	fmt.Println(message)
+}
+
+func printErr(err error) {
+	log.Fatal(err)
+}
+
 func main() {
 	res, err := http.Get("https://www.ahsanzizan.xyz/api/blog")
 	if err != nil {
@@ -35,19 +43,19 @@ func main() {
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		printErr(err)
 	}
 
 	var blogResponse BlogResponse
 	err = json.Unmarshal(body, &blogResponse)
 	if err != nil {
-		log.Fatal(err)
+		printErr(err)
 	}
 
 	// Now you can access the blogs array and prettify it
 	prettifiedData, err := json.MarshalIndent(blogResponse.Blogs, " ", "    ")
 	if err != nil {
-		log.Fatal(err)
+		printErr(err)
 	}
-	fmt.Println(string(prettifiedData))
+	print(string(prettifiedData))
 }
