@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"time"
 )
 
 type User struct {
@@ -18,16 +19,16 @@ var users map[string]User
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 func generateId(n int) string {
+	rand.Seed(time.Now().UnixNano()) // Seed the random number generator
 	b := make([]rune, n)
 	for i := range b {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
-
 	return string(b)
 }
 
 func getUsers(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("Responding to GET /\n")
+	fmt.Println("Responding to GET /")
 
 	usersList := make([]User, 0, len(users))
 
@@ -47,7 +48,7 @@ func getUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func createUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("Responding to POST /")
+	fmt.Println("Responding to POST /")
 
 	var newUser User
 	decoder := json.NewDecoder(r.Body)
@@ -82,13 +83,17 @@ func main() {
 			getUsers(w, r)
 		case http.MethodPost:
 			createUser(w, r)
+		default:
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		}
 	})
 
-	err := http.ListenAndServe(":8080", mux)
+	const port string = ":8080"
+	fmt.Printf("Server started on %s\n", port)
+	err := http.ListenAndServe(port, mux)
 
 	if errors.Is(err, http.ErrServerClosed) {
-		fmt.Printf("Server closed")
+		fmt.Println("Server closed")
 	} else if err != nil {
 		fmt.Printf("Error starting server: %s\n", err)
 		os.Exit(1)
