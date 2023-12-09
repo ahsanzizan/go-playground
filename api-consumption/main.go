@@ -25,6 +25,8 @@ type BlogResponse struct {
 	Blogs   []Blog `json:"blogs"`
 }
 
+const API_URL string = "https://www.ahsanzizan.xyz/api/blog"
+
 func print(message string) {
 	fmt.Println(message)
 }
@@ -34,7 +36,7 @@ func printErr(err error) {
 }
 
 func main() {
-	res, err := http.Get("https://www.ahsanzizan.xyz/api/blog")
+	res, err := http.Get(API_URL)
 	if err != nil {
 		fmt.Print(err.Error())
 		os.Exit(1)
@@ -52,7 +54,6 @@ func main() {
 		printErr(err)
 	}
 
-	// Now you can access the blogs array and prettify it
 	prettifiedData, err := json.MarshalIndent(blogResponse.Blogs, " ", "    ")
 	if err != nil {
 		printErr(err)
