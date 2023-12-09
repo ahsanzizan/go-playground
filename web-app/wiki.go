@@ -1,7 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"html/template"
+	"log"
+	"net/http"
 	"os"
 )
 
@@ -26,12 +28,56 @@ func loadPage(title string) (*Page, error) {
 	return &Page{Title: title, Body: body}, nil
 }
 
-func main() {
-	page := &Page{Title: "test", Body: []byte("This is a sample page.")}
-	page.save()
-	load, err := loadPage("test")
+func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
+	t, err := template.ParseFiles(tmpl + ".html")
 	if err != nil {
-		fmt.Println("An error occurred while loading")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	fmt.Println(string(load.Body))
+	err = t.Execute(w, p)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func handleView(w http.ResponseWriter, r *http.Request) {
+	title := r.URL.Path[len("/view/"):]
+	p, err := loadPage(title)
+	if err != nil {
+		http.Redirect(w, r, "/edit/"+title, http.StatusNotFound)
+		return
+	}
+
+	renderTemplate(w, "view", p)
+}
+
+func handleEdit(w http.ResponseWriter, r *http.Request) {
+	title := r.URL.Path[len("/edit/"):]
+	p, err := loadPage(title)
+	if err != nil {
+		p = &Page{Title: title}
+	}
+
+	renderTemplate(w, "edit", p)
+}
+
+func handleSave(w http.ResponseWriter, r *http.Request) {
+	title := r.URL.Path[len("/save/"):]
+	body := r.FormValue("body")
+	p := &Page{Title: title, Body: []byte(body)}
+	err := p.save()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/view/"+title, http.StatusNotFound)
+}
+
+func main() {
+	const port string = ":8080"
+	http.HandleFunc("/view/", handleView)
+	http.HandleFunc("/edit/", handleEdit)
+	http.HandleFunc("/save/", handleSave)
+	log.Fatal(http.ListenAndServe(port, nil))
 }
